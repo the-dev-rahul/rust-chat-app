@@ -4,4 +4,4 @@
 
 ## cargo run
 
-## type one terminal and press enter
+## type on terminal and press enter
