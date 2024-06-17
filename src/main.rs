@@ -36,7 +36,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
 
 
         let gossipsub_config = gossipsub::ConfigBuilder::default()
-        .duplicate_cache_time(Duration::from_secs(0))
+        // .duplicate_cache_time(Duration::from_secs(0))
         .heartbeat_interval(Duration::from_secs(10)) 
         .validation_mode(gossipsub::ValidationMode::Strict) 
         .message_id_fn(message_id_fn) 
@@ -77,26 +77,21 @@ async fn main() -> Result<(), Box<dyn Error>>{
             event = swarm.select_next_some() => match event {
                 SwarmEvent::Behaviour(MyBehaviourEvent::Mdns(mdns::Event::Discovered(list))) => {
                     for (peer_id, _multiaddr) in list {
-                        println!("mDNS discovered a new peer: {peer_id}");
                         swarm.behaviour_mut().gossipsub.add_explicit_peer(&peer_id);
                     }
                 },
                 SwarmEvent::Behaviour(MyBehaviourEvent::Mdns(mdns::Event::Expired(list))) => {
                     for (peer_id, _multiaddr) in list {
-                        println!("mDNS discover peer has expired: {peer_id}");
                         swarm.behaviour_mut().gossipsub.remove_explicit_peer(&peer_id);
                     }
                 },
                 SwarmEvent::Behaviour(MyBehaviourEvent::Gossipsub(gossipsub::Event::Message {
-                    propagation_source: peer_id,
-                    message_id: id,
+                    propagation_source: _peer_id,
+                    message_id: _id,
                     message,
-                })) => println!(
-                        "Got message: '{}' with id: {id} from peer: {peer_id}",
-                        String::from_utf8_lossy(&message.data),
-                    ),
+                })) => println!("-{}", String::from_utf8_lossy(&message.data)),
                 SwarmEvent::NewListenAddr { address, .. } => {
-                    println!("Local node is listening on {address}");
+                    println!("Connected {address}");
                 }
                 _ => {}
             }
